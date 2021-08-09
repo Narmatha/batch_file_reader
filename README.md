@@ -22,3 +22,6 @@ You can run the application by using the following command:
 You can run the application by using the following command:
 
     gradle clean bootRun
+
+H2 console
+    http://localhost:8081/h2-console

@@ -21,7 +21,7 @@ public class LoggingItemWriter implements ItemWriter<TransactionDTO> {
 
     @Override
     public void write(List<? extends TransactionDTO> list) throws Exception {
-        transactionRepo.save(list.get(0));
+        transactionRepo.saveAll(list);
         LOGGER.info("Writing Transaction: {}", list);
     }
 }

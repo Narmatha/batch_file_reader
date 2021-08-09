@@ -1,10 +1,12 @@
 package net.petrikainulainen.spring.batch;
 
+import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -28,6 +30,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 @Configuration
 public class SpringBatchExampleJobConfig {
+
 
     @Bean
     public FlatFileItemReader fixLengthItemReader(){
@@ -71,6 +74,11 @@ public class SpringBatchExampleJobConfig {
         return new LoggingItemWriter();
     }
 
+    @Bean
+    public ItemProcessor<TransactionDTO,TransactionDTO> itemProcessor() {
+        return new LoggingItemProcessor();
+    }
+
     /**
      * Creates a bean that represents the only step of our batch job.
      * @param reader
@@ -80,11 +88,13 @@ public class SpringBatchExampleJobConfig {
      */
     @Bean
     public Step exampleJobStep(ItemReader<TransactionDTO> reader,
+                               ItemProcessor<TransactionDTO,TransactionDTO> processor,
                                ItemWriter<TransactionDTO> writer,
                                StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("exampleJobStep")
-                .<TransactionDTO, TransactionDTO>chunk(1)
+                .<TransactionDTO, TransactionDTO>chunk(100)
                 .reader(reader)
+                .processor(processor)
                 .writer(writer)
                 .build();
     }
